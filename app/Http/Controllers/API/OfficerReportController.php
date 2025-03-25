@@ -52,26 +52,35 @@ class OfficerReportController extends Controller
             return response()->json(['error' => 'Tugas tidak ditemukan'], 404);
         }
     
-        // Perbarui status assignment
+        // Perbarui status hanya untuk tugas petugas tertentu
         $assignment->status = $request->status;
         $assignment->save();
     
-        // Jika status berubah menjadi 'in_progress', ubah status report juga
-        $report = Report::find($assignment->report_id);
-        if ($report) {
-            $report->status = $request->status;
-            $report->save();
+        // Simpan perubahan ke dalam timeline
+        ReportStatusHistory::create([
+            'report_id' => $assignment->report_id,
+            'status' => $request->status,
+            'updated_by' => auth()->id(),
+        ]);
     
-            // Simpan perubahan ke dalam timeline
-            ReportStatusHistory::create([
-                'report_id' => $report->id,
-                'status' => $request->status,
-                'updated_by' => auth()->id(),
-            ]);
+        // **Cek apakah semua tugas sudah completed**
+        $allAssignmentsCompleted = Assignment::where('report_id', $assignment->report_id)
+            ->where('status', '!=', 'completed')
+            ->exists(); // Jika masih ada yang belum 'completed', maka false
+    
+        if (!$allAssignmentsCompleted) {
+            // Jika semua tugas sudah 'completed', baru ubah status Report
+            $report = Report::find($assignment->report_id);
+            if ($report) {
+                $report->status = 'completed';
+                $report->save();
+            }
         }
     
-        return response()->json(['message' => 'Status tugas dan laporan diperbarui!']);
+        return response()->json(['message' => 'Status tugas diperbarui!']);
     }
+    
+    
 
     public function completeAssignment(Request $request, $id) {
         $assignment = Assignment::find($id);
@@ -83,17 +92,21 @@ class OfficerReportController extends Controller
             return response()->json(['error' => 'Tugas tidak dapat diselesaikan karena tidak sedang dalam proses'], 400);
         }
     
-        // Perbarui status assignment
-        $assignment->status = 'completed';
-        $assignment->save();
+        // Ambil semua assignment yang terkait dengan laporan yang sama
+        $relatedAssignments = Assignment::where('report_id', $assignment->report_id)->get();
     
-        // Perbarui status report
+        foreach ($relatedAssignments as $relatedAssignment) {
+            $relatedAssignment->status = 'completed';
+            $relatedAssignment->save();
+        }
+    
+        // Perbarui status laporan utama (Report)
         $report = Report::find($assignment->report_id);
         if ($report) {
             $report->status = 'completed';
             $report->save();
     
-            // Simpan ke dalam timeline status laporan
+            // Simpan perubahan ke dalam timeline status laporan
             ReportStatusHistory::create([
                 'report_id' => $report->id,
                 'status' => 'completed',
@@ -101,8 +114,9 @@ class OfficerReportController extends Controller
             ]);
         }
     
-        return response()->json(['message' => 'Tugas berhasil diselesaikan!']);
+        return response()->json(['message' => 'Tugas berhasil diselesaikan untuk semua petugas!']);
     }
+    
     
 
 }

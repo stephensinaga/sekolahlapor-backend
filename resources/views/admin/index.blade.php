@@ -52,11 +52,12 @@
 
                 <div class="modal-body">
                     <label>Pilih Petugas:</label>
-                    <select name="officer_id" class="form-control" required>
+                    <select name="officer_ids[]" class="form-control" multiple required>
                         @foreach ($officers as $officer)
                         <option value="{{ $officer->id }}">{{ $officer->name }}</option>
                         @endforeach
                     </select>
+                    <small class="text-muted">Gunakan <kbd>Ctrl</kbd> (Windows) atau <kbd>Cmd</kbd> (Mac) untuk memilih lebih dari satu.</small>
                 </div>
 
                 <div class="modal-footer">
@@ -68,5 +69,6 @@
     </div>
 </div>
 @endforeach
+
 
 @endsection

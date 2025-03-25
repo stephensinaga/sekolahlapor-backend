@@ -29,6 +29,42 @@ class UserSeeder extends Seeder
                 'role' => 'petugas',
             ],
             [
+                'name' => 'Kepala Wisma Putra',
+                'email' => 'kepalawismaputra@gmail.com',
+                'password' => 'wisma123',
+                'role' => 'petugas',
+            ],
+            [
+                'name' => 'Kepala Wisma Putri',
+                'email' => 'kepalawismaputri@gmail.com',
+                'password' => 'wisma123',
+                'role' => 'petugas',
+            ],
+            [
+                'name' => 'Wakasis',
+                'email' => 'wakasis@gmail.com',
+                'password' => 'wakasis123',
+                'role' => 'petugas',
+            ],
+            [
+                'name' => 'Waka Sarpras',
+                'email' => 'wakapras@gmail.com',
+                'password' => 'wakapras123',
+                'role' => 'petugas',
+            ],
+            [
+                'name' => 'Guru Piket',
+                'email' => 'gurupiket@gmail.com',
+                'password' => 'gurupiket123',
+                'role' => 'petugas',
+            ],
+            [
+                'name' => 'Sutik',
+                'email' => 'sutik@gmail.com',
+                'password' => 'sutik123',
+                'role' => 'petugas',
+            ],
+            [
                 'name' => 'User',
                 'email' => 'user@gmail.com',
                 'password' => 'user123',

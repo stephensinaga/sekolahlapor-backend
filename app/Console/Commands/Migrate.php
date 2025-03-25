@@ -15,7 +15,6 @@ class Migrate extends Command
         $this->call('migrate:fresh');
 
         $this->call('db:seed', ['--class' => 'UserSeeder']);
-        $this->call('db:seed', ['--class' => 'CityDistrictSeeder']);
         $this->info('Database successfully refreshed and seeded.');
     }
 }

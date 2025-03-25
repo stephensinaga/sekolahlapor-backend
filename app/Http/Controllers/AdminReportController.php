@@ -41,13 +41,19 @@ class AdminReportController extends Controller
 
     // Meneruskan laporan ke petugas
     public function assign(Request $request, $id) {
-        $request->validate(['officer_id' => 'required|exists:users,id']);
-
-        Assignment::create([
-            'report_id' => $id,
-            'officer_id' => $request->officer_id,
-            'status' => 'assigned'
+        // $request->validate(['officer_id' => 'required|exists:users,id']);
+        $request->validate([
+            'officer_ids' => 'required|array',  // Bisa banyak petugas
+            'officer_ids.*' => 'exists:users,id' // Pastikan setiap ID valid
         ]);
+
+        foreach ($request->officer_ids as $officerId) {
+            Assignment::create([
+                'report_id' => $id,
+                'officer_id' => $officerId,
+                'status' => 'assigned'
+            ]);
+        }
 
         $report = Report::findOrFail($id);
         $report->status = 'accepted';

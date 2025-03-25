@@ -16,9 +16,7 @@ class Report extends Model
         'photo_2',
         'photo_3',
         'description',
-        'kota',
-        'kecamatan',
-        'address',
+        'location',
         'status',
     ];
 
@@ -26,4 +24,13 @@ class Report extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function assignments() {
+        return $this->hasMany(Assignment::class);
+    }
+    
+    public function officers() {
+        return $this->belongsToMany(User::class, 'assignments', 'report_id', 'officer_id');
+    }
+    
 }

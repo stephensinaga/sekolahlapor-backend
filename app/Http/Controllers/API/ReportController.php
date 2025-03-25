@@ -46,12 +46,15 @@ class ReportController extends Controller
     // Menampilkan detail laporan berdasarkan ID
     public function show($id)
     {
-        $report = Report::with('user')->find($id);
+        $report = Report::with(['user', 'statusHistory.updatedBy'])->find($id);
+    
         if (!$report) {
             return response()->json(['success' => false, 'message' => 'Laporan tidak ditemukan'], 404);
         }
+    
         return response()->json(['success' => true, 'data' => $report]);
     }
+    
 
     // Membuat laporan baru
     public function store(Request $request)
@@ -62,9 +65,7 @@ class ReportController extends Controller
             'photo_2' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'photo_3' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'keterangan' => 'required|string',
-            'kota' => 'required|string',
-            'kecamatan' => 'required|string',
-            'alamat' => 'required|string',
+            'location' => 'required|string',
         ]);
 
         if ($validator->fails()) {
@@ -88,9 +89,7 @@ class ReportController extends Controller
                 'photo_2' => $photo2Path,
                 'photo_3' => $photo3Path,
                 'description' => $request->keterangan,
-                'kota' => $request->kota,
-                'kecamatan' => $request->kecamatan,
-                'address' => $request->alamat,
+                'location' => $request->location,
                 'status' => 'pending',
             ]);
 
@@ -146,27 +145,25 @@ class ReportController extends Controller
         return response()->json(['success' => true, 'message' => 'Laporan berhasil dihapus']);
     }
 
-    public function getCities()
-    {
-        try {
-            $cities = City::with('districts')->get(); // ✅ Pastikan districts ikut dimuat
-            return response()->json($cities);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
+    // public function getCities()
+    // {
+    //     try {
+    //         $cities = City::with('districts')->get(); // ✅ Pastikan districts ikut dimuat
+    //         return response()->json($cities);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => $e->getMessage()], 500);
+    //     }
+    // }
 
-    public function getReportHistory($id)
-    {
+    public function getReportHistory($id) {
         $history = ReportStatusHistory::where('report_id', $id)
-            ->with('user') 
-            ->orderBy('created_at', 'asc')
+            ->with('updatedBy:id,name') // Ambil nama petugas
+            ->orderBy('updated_at', 'desc') // Pakai updated_at agar urutan lebih akurat
             ->get();
-    
-        Log::info('Report History Data:', $history->toArray()); // ✅ Tambahkan log
     
         return response()->json(['success' => true, 'data' => $history]);
     }
+    
     
 
     
